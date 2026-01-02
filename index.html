@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Guiding Day</title>
+  <meta name="description" content="Guiding Day — answer questions as your character to discover which of six magics suits you.">
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Skip link for keyboard users -->
+  <a class="skip-link" href="#app">Skip to main content</a>
+
+  <!-- ===== Global background music (runs throughout) ===== -->
+  <audio id="bgm" src="music.mp3" loop preload="auto"></audio>
+  <div class="audioDock" aria-label="Background music controls">
+    <button id="btnBgmToggle" class="audioBtn" aria-pressed="false" aria-label="Play background music">Play</button>
+    <div class="audioMeta" aria-hidden="true">
+      <div class="audioTitle" id="audioTitle">Welcome To Prismia</div>
+      <div class="audioSub" id="audioSub">Do You Feel Immersed Yet?</div>
+    </div>
+    <input class="audioVol" id="audioVol" type="range" min="0" max="1" step="0.01" value="0.6" aria-label="Volume">
+  </div>
+
+  <!-- ===== Loading Screen ===== -->
+  <div id="loadingScreen" class="loading active" role="status" aria-live="polite" aria-hidden="false">
+    <div class="loadingCard">
+      <div class="loadingTitle">Preparing the magic…</div>
+
+      <div class="swordMeter" aria-hidden="true">
+        <div class="swordBase"></div>
+        <div class="swordFillClip" id="loadingFill">
+          <div class="swordFill"></div>
+        </div>
+      </div>
+
+      <div class="loadingSub loadingPct" id="loadingText">Loading assets (0%)</div>
+
+      <button id="btnEnter" type="button" class="enterBtn" disabled aria-label="Enter the experience">
+        <img src="image/enter.png" alt="Enter the quiz" loading="lazy">
+      </button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div class="brand">
+          <h1>Guiding Day</h1>
+          <p>Answer the Questions From The Perspective Of Your Character And Be Gifted → 1 Of 6 Magics</p>
+        </div>
+
+        <div class="progress"
+             role="progressbar"
+             aria-label="Progress"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             aria-valuenow="0">
+          <div class="bar" aria-hidden="true">
+            <div id="barFill" style="width:0%"></div>
+          </div>
+          <small id="barText">Start</small>
+        </div>
+      </header>
+
+      <main id="app">
+        <!-- START PAGE -->
+        <section class="page active" id="page-start" role="region" aria-labelledby="start-title">
+          <h2 class="title" id="start-title">Ready To Be Chosen?</h2>
+
+          <!-- Start image -->
+          <figure class="start-media">
+            <img class="hero-img" src="image/waltz.png" alt="Illustration of a person stepping into a beam of light" loading="lazy">
+            <figcaption>Step Into Light And Discover What Magic Chooses You.</figcaption>
+          </figure>
+
+          <button class="btn primary" id="btnBegin" type="button">Begin</button>
+        </section>
+
+        <!-- QUESTION PAGE -->
+        <section class="page" id="page-question" aria-live="polite" role="region" aria-labelledby="question-heading">
+          <div class="qhead">
+            <span class="qnum" id="qNum">Question 1 of 16</span>
+          </div>
+
+          <h3 id="question-heading" class="sr-only">Question content</h3>
+          <p class="qtext" id="qText">Question text goes here…</p>
+
+          <!-- Per-question image -->
+          <figure class="q-media" id="qMedia" style="display:none;" aria-hidden="true">
+            <img id="qImage" src="" alt="" loading="lazy">
+            <figcaption id="qCaption"></figcaption>
+          </figure>
+
+          <!-- Q1 shelf UI (only shown for question 1) -->
+          <div class="shelfWrap" id="q1ShelfWrap" style="display:none;">
+            <div class="shelf" id="shelf" style="--shelf-img:url('image/bag.png');" role="list">
+              <!-- items injected by JS -->
+            </div>
+            <p class="shelfHint">Choose one item from the shelf.</p>
+          </div>
+
+          <!-- Standard answers UI (Q2–Q16) -->
+          <div class="answers" id="answers" role="list"></div>
+
+          <div class="nav">
+            <button class="btn" id="btnBack" type="button" aria-label="Previous question">← Back</button>
+            <button class="btn primary" id="btnNext" type="button" disabled aria-label="Next question">Next →</button>
+          </div>
+        </section>
+
+        <!-- ✅ TIE-BREAK (Option C shelf page) -->
+        <section class="page" id="page-tie" aria-live="polite" role="region" aria-labelledby="tie-heading">
+          <div class="qhead">
+            <span class="qnum">Tie-break</span>
+          </div>
+
+          <h3 id="tie-heading" class="sr-only">Tie-break</h3>
+          <p class="qtext" id="tieText">Two magics reach for you… choose the one that feels louder.</p>
+
+          <div class="shelfWrap" id="tieShelfWrap">
+            <div class="shelf" id="tieShelf" style="--shelf-img:url('image/bag.png');" role="list">
+              <!-- tie items injected by JS -->
+            </div>
+            <p class="shelfHint">Choose one to resolve the tie.</p>
+          </div>
+
+          <div class="nav">
+            <button class="btn" id="btnTieBack" type="button">← Back</button>
+            <button class="btn primary" id="btnTieConfirm" type="button" disabled>Confirm →</button>
+          </div>
+        </section>
+
+        <!-- RESULTS -->
+        <section class="page" id="page-result" role="region" aria-labelledby="result-title">
+          <h2 class="title" id="result-title">Your Personality: —</h2>
+          <p class="subtitle" id="resultDesc">Result description goes here.</p>
+
+          <div class="resultGrid">
+            <div>
+              <h3 style="margin:0 0 8px; font-size:16px;">What this means</h3>
+              <div id="resultBody" style="color:var(--muted)"></div>
+              <div class="pillRow" id="resultTags" role="list"></div>
+            </div>
+
+            <div>
+              <h3 style="margin:0 0 8px; font-size:16px;">Breakdown</h3>
+              <div id="scoreBreakdown" style="color:var(--muted); font-size:13px; white-space:pre-wrap;"></div>
+            </div>
+          </div>
+
+          <div class="nav" style="margin-top:18px;">
+            <button class="btn" id="btnRestart" type="button">↻ Restart</button>
+            <button class="btn primary" id="btnShare" type="button" aria-label="Copy result to clipboard">Copy result</button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <noscript>
+    <div class="noscript-warning" role="alert">
+      This experience requires JavaScript. Please enable JavaScript to continue.
+    </div>
+  </noscript>
+
+  <script src="script.js"></script>
+
+  <!-- Small accessible helpers: audio toggle + progress/loading helpers.
+       Your main script can call window.appUI.setProgress(percent) and
+       window.appUI.hideLoading() to keep ARIA attributes updated. -->
+  <script>
+  (function(){
+    const audio = document.getElementById('bgm');
+    const btn = document.getElementById('btnBgmToggle');
+    const vol = document.getElementById('audioVol');
+
+    if (audio && btn) {
+      // Initialize volume from control
+      audio.volume = vol ? vol.value : 0.6;
+
+      btn.addEventListener('click', () => {
+        if (audio.paused) {
+          audio.play().then(() => {
+            btn.textContent = 'Pause';
+            btn.setAttribute('aria-pressed','true');
+            btn.setAttribute('aria-label','Pause background music');
+          }).catch(() => {
+            // Autoplay can be blocked; keep UI consistent
+            btn.textContent = 'Play';
+            btn.setAttribute('aria-pressed','false');
+          });
+        } else {
+          audio.pause();
+          btn.textContent = 'Play';
+          btn.setAttribute('aria-pressed','false');
+          btn.setAttribute('aria-label','Play background music');
+        }
+      });
+
+      if (vol) {
+        vol.addEventListener('input', () => {
+          audio.volume = vol.value;
+        });
+      }
+    }
+
+    // Expose small helpers so your main script can update ARIA states
+    window.appUI = {
+      setProgress(percent) {
+        const bar = document.getElementById('barFill');
+        const barText = document.getElementById('barText');
+        const progress = document.querySelector('.progress');
+        const n = Math.max(0, Math.min(100, Number(percent) || 0));
+        if (bar) bar.style.width = n + '%';
+        if (barText) barText.textContent = n === 0 ? 'Start' : n + '%';
+        if (progress) progress.setAttribute('aria-valuenow', String(Math.round(n)));
+      },
+      hideLoading() {
+        const ls = document.getElementById('loadingScreen');
+        if (ls) {
+          ls.classList.remove('active');
+          ls.setAttribute('aria-hidden', 'true');
+        }
+      },
+      showLoading() {
+        const ls = document.getElementById('loadingScreen');
+        if (ls) {
+          ls.classList.add('active');
+          ls.removeAttribute('aria-hidden');
+        }
+      }
+    };
+  })();
+  </script>
+</body>
+</html>

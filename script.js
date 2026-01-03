@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // -----------------------------
     // CONFIG
     // -----------------------------
-    const MIN_LOADER_MS = 10000; // minimum time before 100%
+    const MIN_LOADER_MS = 15000; // minimum time before 100%
     const FINISH_MS = 600;       // last 10% smooth finish duration
     const clamp01 = (n) => Math.max(0, Math.min(1, n));
 

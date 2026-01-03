@@ -13,20 +13,98 @@ document.addEventListener("DOMContentLoaded", () => {
     // -----------------------------
     // CONFIG
     // -----------------------------
-    const MIN_LOADER_MS = 15000; // minimum time before 100%
+    const MIN_LOADER_MS = 10000; // minimum time before 100%
     const FINISH_MS = 600;       // last 10% smooth finish duration
     const clamp01 = (n) => Math.max(0, Math.min(1, n));
 
     // -----------------------------
-    // PERSONALITIES
+    // PERSONALITIES / MAGICS (keys stay color-based to match picks)
     // -----------------------------
     const PERSONALITIES = [
-      { key: "blue",   name: "Blue",   desc: "Calm, reflective, and intuitive.", tags: ["Composed", "Insightful", "Steady"], icon: "image/blue.png" },
-      { key: "green",  name: "Green",  desc: "Curious, growth-minded, and patient.", tags: ["Adaptable", "Grounded", "Thoughtful"], icon: "image/green.png" },
-      { key: "red",    name: "Red",    desc: "Bold, decisive, and passionate.", tags: ["Driven", "Brave", "Direct"], icon: "image/red.png" },
-      { key: "yellow", name: "Yellow", desc: "Optimistic, playful, and inventive.", tags: ["Bright", "Social", "Creative"], icon: "image/yellow.png" },
-      { key: "orange", name: "Orange", desc: "Energetic, daring, and adventurous.", tags: ["Spontaneous", "Lively", "Risk-taker"], icon: "image/orange.png" },
-      { key: "purple", name: "Purple", desc: "Mysterious, artistic, and visionary.", tags: ["Imaginative", "Deep", "Original"], icon: "image/purple.png" },
+      {
+        key: "red",
+        name: "Winds",
+        title: "Chosen by the Winds",
+        desc: "A red soul: passionate, untamed, and built for the journey.",
+        tags: ["Free Soul", "Nomadic", "Passionate"],
+        icon: "image/red.png",
+        bodyHtml: `
+          <p><strong>Winds</strong> don’t ask permission—they move.</p>
+          <p>Your magic rises from a <strong>free soul</strong>, fueled by emotion, momentum, and the pull of open horizons. Outsiders often mistake your intensity for aggression, but the truth is simpler: you feel deeply, and you live honestly.</p>
+          <p>Those Chosen by the Winds tend to thrive in rugged climates and high places—beautiful mountainside cities, migrating with weather and conditions as needed. Community matters here: tough from a young age, but loyal, protective, and surprisingly warm once you’re “in.”</p>
+          <p><em>If you’re Chosen by the Winds, you’re a free spirit—someone who values the road, the story, and the people beside you more than any final destination.</em></p>
+        `,
+      },
+      {
+        key: "orange",
+        name: "Flame",
+        title: "Chosen by the Flame",
+        desc: "A focused soul: disciplined heat, tradition, and watchful devotion.",
+        tags: ["Focused Soul", "Disciplined", "Traditional"],
+        icon: "image/orange.png",
+        bodyHtml: `
+          <p><strong>Flame</strong> is not chaos—it’s control.</p>
+          <p>Your power comes from a <strong>focused soul</strong>: emotions contained, understood, and directed like a steady torch in a storm. Those chosen by the Flame often carry deep respect for history, ritual, and the spirits that shaped their region.</p>
+          <p>They’re protective of culture and stubborn about what matters—yet not closed-minded. Recent conflict and leadership fractures have pushed many to migrate, bringing new voices into old halls. In times like this, Flame learns what it truly is: fear… or courage.</p>
+          <p><em>If you’re Chosen by the Flame, you’re steady under pressure—and when you act, you do so with purpose.</em></p>
+        `,
+      },
+      {
+        key: "yellow",
+        name: "Harvest",
+        title: "Chosen by the Harvest",
+        desc: "A controlled body: strength, service, and the pride of being useful.",
+        tags: ["Focused Body", "Provider", "Enduring"],
+        icon: "image/yellow.png",
+        bodyHtml: `
+          <p><strong>Harvest</strong> is the magic of strength and sheer will.</p>
+          <p>Your gift is drawn through a <strong>controlled body</strong>—muscle, bone, and blood made into a channel. That control becomes strength: the kind needed to protect, to build, and to feed entire regions.</p>
+          <p>Harvest communities live simply, but not small. Fields stretch far, leadership shifts crop-to-crop, and generosity runs deep—though it’s often tied to a strong inner drive: the desire to live a full, useful life.</p>
+          <p><em>If you’re Chosen by the Harvest, you’re reliable power—someone people lean on when things get real.</em></p>
+        `,
+      },
+      {
+        key: "green",
+        name: "Forest",
+        title: "Chosen by the Forest",
+        desc: "A free body: flowing instincts, artistry, and magic that dances.",
+        tags: ["Free Body", "Artistic", "Spiritual"],
+        icon: "image/green.png",
+        bodyHtml: `
+          <p><strong>Forest</strong> does not force—it guides.</p>
+          <p>Your magic is born from a <strong>free body</strong>: you sense energy and move with it, like dancing. Forest folk tend to be musical, expressive, and alive to subtle shifts—wind through leaves, current through roots.</p>
+          <p>Spirituality runs deep here. Many believe the dead become part of the forest itself, woven into the region’s living magic. Communities form in smaller pods along waterways, with larger leadership shared across five major family lines.</p>
+          <p><em>If you’re Chosen by the Forest, you’re intuitive and creative—and you trust flow over force.</em></p>
+        `,
+      },
+      {
+        key: "blue",
+        name: "Sea",
+        title: "Chosen by the Sea",
+        desc: "A free, creative mind: curiosity, craft, and endless horizons.",
+        tags: ["Free Mind", "Curious", "Creative"],
+        icon: "image/blue.png",
+        bodyHtml: `
+          <p><strong>Sea</strong> is learning and adaptation turned into power.</p>
+          <p>Your gift is shaped by a <strong>free mind</strong>—the kind that explores, questions, combines, and invents. Sea mages treat education and art like essentials, not luxuries.</p>
+          <p>The region is a scattered chain of archipelagos with cities that span both above-water neighborhoods and underwater districts. The ruling family’s island holds the largest university—an engine of new spells, new ideas, and bold collaboration with other magics.</p>
+          <p><em>If you’re Chosen by the Sea, you’re a builder of possibilities—and you’re never done learning, albiet maybe a little scatter-brained.</em></p>
+        `,
+      },
+      {
+        key: "purple",
+        name: "Stone",
+        title: "Chosen by Stone",
+        desc: "A focused mind: strategy, precision, and unshakable defense.",
+        tags: ["Focused Mind", "Strategic", "Resilient"],
+        icon: "image/purple.png",
+        bodyHtml: `
+          <p><strong>Stone</strong> is patience with an edge.</p>
+          <p>Your power comes from a <strong>focused mind</strong>—meticulous, planning-oriented, and sometimes so precise it becomes tunnel vision. Stone folk are famously defensive, but not passive: when needed, they strike with deliberate force.</p>
+          <p>The region is rocky and harsh, yet its cities are crafted masterpieces—safe, beautiful, and built to endure. A central ruling family leads from the largest city, with strict control on those around it. Order is crucial after all.</p>
+          <p><em>If you’re Chosen by Stone, you’re a force of reason that always ensures that a plan is in place.</em></p>
+        `,
+      },
     ];
 
     // -----------------------------
@@ -109,12 +187,12 @@ document.addEventListener("DOMContentLoaded", () => {
         image: "image/q6.png",
         caption: "",
         answers: [
-          { text: "Invite the room’s spirits to watch with you.",               pick: "red"    },
-          { text: "Set wards in perfect layers and keep a strict routine.",     pick: "orange" },
-          { text: "Stay moving—circling, listening, sensing shifts in the air.",pick: "green"  },
-          { text: "Build a physical barricade and keep your weapon ready.",     pick: "yellow" },
-          { text: "Leave a decoy and hide surprises for the would-be thieves.", pick: "blue"   },
-          { text: "Map every entrance, angle, and timing—then predict threats.",pick: "purple" },
+          { text: "Invite the room’s spirits to watch with you.",                pick: "red"    },
+          { text: "Set wards in perfect layers and keep a strict routine.",      pick: "orange" },
+          { text: "Stay moving—circling, listening, sensing shifts in the air.", pick: "green"  },
+          { text: "Build a physical barricade and keep your weapon ready.",      pick: "yellow" },
+          { text: "Leave a decoy and hide surprises for the would-be thieves.",  pick: "blue"   },
+          { text: "Map every entrance, angle, and timing—then predict threats.", pick: "purple" },
         ],
       },
       {
@@ -392,7 +470,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // -----------------------------
     function loaderMessageForPct(pct) {
       if (pct < 34) return "Exploring City...";
-      if (pct < 67) return "Enjoying Festival...";
+      if (pct < 67) return "Celebrating Festivities...";
       return "Entering Square...";
     }
 
@@ -472,7 +550,7 @@ document.addEventListener("DOMContentLoaded", () => {
             btnBegin.disabled = false;
             loadingScreen.classList.add("ready"); // triggers your gradient overlay CSS
             if (loadingText) loadingText.textContent = "Loaded! Press Enter to begin.";
-            return; // STOP the RAF loop
+            return;
           }
 
           requestAnimationFrame(tick);
@@ -675,12 +753,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const p = PERSONALITIES.find(x => x.key === finalWinnerKey) || PERSONALITIES[0];
 
-      resultTitle.textContent = `Your Personality: ${p.name}`;
-      resultDesc.textContent = p.desc;
+      // Title + short description
+      resultTitle.textContent = p.title || `Chosen by the ${p.name}`;
+      resultDesc.textContent = p.desc || "";
 
-      resultBody.textContent =
-        `This page is customized for ${p.name}. Replace this text with your full personality page content.`;
+      // Long description
+      resultBody.innerHTML = p.bodyHtml || "";
 
+      // Tags
       resultTags.innerHTML = "";
       (p.tags || []).forEach(t => {
         const span = document.createElement("span");
@@ -689,6 +769,7 @@ document.addEventListener("DOMContentLoaded", () => {
         resultTags.appendChild(span);
       });
 
+      // Debug breakdown
       const lines = PERSONALITIES.map(pp => `${pp.key.padEnd(7)} : ${counts[pp.key]}`).join("\n");
       scoreBreakdown.textContent =
         `Counts (Q2–Q8):\n${lines}\n\nLeaders: ${leaders.join(", ")}\nQ1 pick: ${picks[0] ?? "—"}\nWinner: ${finalWinnerKey}`;
@@ -772,7 +853,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btnShare.addEventListener("click", async () => {
       const winner = finalWinnerKey || computeResult().winnerKey;
       const p = PERSONALITIES.find(x => x.key === winner) || PERSONALITIES[0];
-      const text = `I got ${p.name} on the quiz!`;
+      const text = `I was ${p.title || `Chosen by the ${p.name}`}!`;
 
       try {
         await navigator.clipboard.writeText(text);

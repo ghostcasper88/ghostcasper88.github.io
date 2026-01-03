@@ -9,6 +9,7 @@
 <body>
   <!-- ===== Global background music (runs throughout) ===== -->
   <audio id="bgm" src="music.mp3" loop preload="auto"></audio>
+
   <div class="audioDock" aria-label="Background music controls">
     <div class="audioMeta">
       <div class="audioTitle" id="audioTitle">Welcome To Prismia</div>
@@ -22,18 +23,135 @@
     <div class="loadingCard">
       <div class="loadingTitle">Preparing the magic…</div>
 
-      <div class="swordMeter">
+      <!-- Sword loader -->
+      <div class="swordMeter" aria-hidden="true">
         <div class="swordBase"></div>
+
+        <!-- IMPORTANT: JS targets #loadingFill and changes its HEIGHT for bottom-up fill -->
         <div class="swordFillClip" id="loadingFill">
           <div class="swordFill"></div>
         </div>
       </div>
 
+      <!-- Loading message / percent (centered under sword) -->
       <div class="loadingSub loadingPct" id="loadingText">Loading assets (0%)</div>
 
+      <!-- Enter button (image) -->
       <button id="btnEnter" type="button" class="enterBtn" disabled aria-label="Enter">
-        <img src="image/enter.png" alt="">
+        <img src="image/enter.png" alt="Enter">
       </button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <div class="brand">
+          <h1>Guiding Day</h1>
+          <p>Answer the Questions From The Prespective Of Your Character And Be Gifted → 1 Of 6 Magics</p>
+        </div>
+
+        <div class="progress" aria-label="Progress">
+          <div class="bar" aria-hidden="true"><i id="barFill"></i></div>
+          <small id="barText">Start</small>
+        </div>
+      </header>
+
+      <main id="app">
+        <!-- START PAGE -->
+        <section class="page active" id="page-start">
+          <h2 class="title">Ready To Be Chosen?</h2>
+
+          <figure class="start-media">
+            <img class="hero-img" src="image/waltz.png" alt="">
+            <figcaption>Step Into Light And Discover What Magic Chooses You.</figcaption>
+          </figure>
+
+          <button class="btn primary" id="btnBegin" type="button">Begin</button>
+        </section>
+
+        <!-- QUESTION PAGE -->
+        <section class="page" id="page-question" aria-live="polite">
+          <div class="qhead">
+            <span class="qnum" id="qNum">Question 1 of 8</span>
+          </div>
+
+          <p class="qtext" id="qText">Question text goes here…</p>
+
+          <figure class="q-media" id="qMedia" style="display:none;">
+            <img id="qImage" src="" alt="">
+            <figcaption id="qCaption"></figcaption>
+          </figure>
+
+          <!-- Q1 shelf -->
+          <div class="shelfWrap" id="q1ShelfWrap" style="display:none;">
+            <div class="shelf" id="shelf" style="--shelf-img:url('image/bag.png');">
+              <!-- items injected by JS -->
+            </div>
+            <p class="shelfHint">Choose one item from the shelf.</p>
+          </div>
+
+          <!-- Standard answers -->
+          <div class="answers" id="answers"></div>
+
+          <div class="nav">
+            <button class="btn" id="btnBack" type="button">← Back</button>
+            <button class="btn primary" id="btnNext" type="button" disabled>Next →</button>
+          </div>
+        </section>
+
+        <!-- TIE-BREAK PAGE -->
+        <section class="page" id="page-tie" aria-live="polite">
+          <div class="qhead">
+            <span class="qnum">Tie-break</span>
+          </div>
+
+          <p class="qtext" id="tieText">Two magics reach for you… choose the one that feels louder.</p>
+
+          <div class="shelfWrap" id="tieShelfWrap">
+            <div class="shelf" id="tieShelf" style="--shelf-img:url('image/bag.png');">
+              <!-- tie items injected by JS -->
+            </div>
+            <p class="shelfHint">Choose one to resolve the tie.</p>
+          </div>
+
+          <div class="nav">
+            <button class="btn" id="btnTieBack" type="button">← Back</button>
+            <button class="btn primary" id="btnTieConfirm" type="button" disabled>Confirm →</button>
+          </div>
+        </section>
+
+        <!-- RESULTS -->
+        <section class="page" id="page-result">
+          <h2 class="title" id="resultTitle">Your Personality: —</h2>
+          <p class="subtitle" id="resultDesc">Result description goes here.</p>
+
+          <div class="resultGrid">
+            <div>
+              <h3 style="margin:0 0 8px; font-size:16px;">What this means</h3>
+              <div id="resultBody" style="color:var(--muted)"></div>
+              <div class="pillRow" id="resultTags"></div>
+            </div>
+
+            <div>
+              <h3 style="margin:0 0 8px; font-size:16px;">Breakdown</h3>
+              <div id="scoreBreakdown" style="color:var(--muted); font-size:13px; white-space:pre-wrap;"></div>
+            </div>
+          </div>
+
+          <div class="nav" style="margin-top:18px;">
+            <button class="btn" id="btnRestart" type="button">↻ Restart</button>
+            <button class="btn primary" id="btnShare" type="button">Copy result</button>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- Script goes at the very bottom so all IDs exist before JS runs -->
+  <script src="script.js"></script>
+</body>
+</html>
     </div>
   </div>
 

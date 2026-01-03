@@ -1,9 +1,9 @@
 /* script.js
-   5Q Personality Quiz (Q1 shelf + Q2–Q5 answers)
-   - Loader + sword fill (height) + 3 messages by %
-   - Tie-break page (Option C shelf) if needed
-   - Results show after Q5 (or after tie-break)
-   - FIX: stop Q2–Q5 from auto-jumping to bottom / trapping scroll
+   8Q Personality Quiz (Q1 shelf + Q2–Q8 answers)
+   - Loader + sword fill (LEFT→RIGHT) using scaleX on .swordFill
+   - Adds .ready on loading screen when finished (for gradient overlay)
+   - Tie-break page if needed
+   - Scroll/focus fix for mobile
 */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -18,8 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const clamp01 = (n) => Math.max(0, Math.min(1, n));
 
     // -----------------------------
-    // PERSONALITIES (add icon if you want custom tie images)
-    // If you don't have these files, either create them or change the paths.
+    // PERSONALITIES
     // -----------------------------
     const PERSONALITIES = [
       { key: "blue",   name: "Blue",   desc: "Calm, reflective, and intuitive.", tags: ["Composed", "Insightful", "Steady"], icon: "image/blue.png" },
@@ -31,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
 
     // -----------------------------
-    // QUESTIONS (5 total)
+    // QUESTIONS (8 total)
     // -----------------------------
     const QUESTIONS = [
       {
@@ -82,12 +81,12 @@ document.addEventListener("DOMContentLoaded", () => {
         image: "image/q4.png",
         caption: "",
         answers: [
-          { text: "Step forward and fight.",                                                                   pick: "red"    },
-          { text: "Lower your voice, slow your breath, and contain the flare.",                                 pick: "orange" },
-          { text: "Move with the chaos—dodging, weaving, guiding others out.",                                  pick: "green"  },
-          { text: "Plant your stance, shield a child, and take control physically.",                            pick: "yellow" },
-          { text: "Laugh, improvise, and turn the accident into a harmless spectacle.",                         pick: "blue"   },
-          { text: "Analyse where the spell came from and what kind of spell it was before going on defense.",  pick: "purple" },
+          { text: "Step forward and fight.",                                                                  pick: "red"    },
+          { text: "Lower your voice, slow your breath, and contain the flare.",                                pick: "orange" },
+          { text: "Move with the chaos—dodging, weaving, guiding others out.",                                 pick: "green"  },
+          { text: "Plant your stance, shield a child, and take control physically.",                           pick: "yellow" },
+          { text: "Laugh, improvise, and turn the accident into a harmless spectacle.",                        pick: "blue"   },
+          { text: "Analyse where the spell came from and what kind of spell it was before going on defense.", pick: "purple" },
         ],
       },
       {
@@ -96,12 +95,54 @@ document.addEventListener("DOMContentLoaded", () => {
         image: "image/q5.png",
         caption: "",
         answers: [
-          { text: "Trust your heart and the people closest to you.",              pick: "red"    },
-          { text: "Trust in the spirits understanding your intentions.",          pick: "orange" },
-          { text: "Trust in your survival skills and intuition.",                 pick: "green"  },
-          { text: "Trust in your strength.",                                      pick: "yellow" },
-          { text: "Trust in your ability to adapt and overcome.",                 pick: "blue"   },
-          { text: "Trust in your research.",                                      pick: "purple" },
+          { text: "Trust your heart and the people closest to you.",     pick: "red"    },
+          { text: "Trust in the spirits understanding your intentions.", pick: "orange" },
+          { text: "Trust in your survival skills and intuition.",        pick: "green"  },
+          { text: "Trust in your strength.",                             pick: "yellow" },
+          { text: "Trust in your ability to adapt and overcome.",        pick: "blue"   },
+          { text: "Trust in your research.",                             pick: "purple" },
+        ],
+      },
+      {
+        id: 6,
+        text: "Question 6: You’re asked to guard a sacred relic overnight that you believe someone is trying to steal. What’s your method?",
+        image: "image/q6.png",
+        caption: "",
+        answers: [
+          { text: "Invite the room’s spirits to watch with you.",               pick: "red"    },
+          { text: "Set wards in perfect layers and keep a strict routine.",     pick: "orange" },
+          { text: "Stay moving—circling, listening, sensing shifts in the air.",pick: "green"  },
+          { text: "Build a physical barricade and keep your weapon ready.",     pick: "yellow" },
+          { text: "Leave a decoy and hide surprises for the would-be thieves.", pick: "blue"   },
+          { text: "Map every entrance, angle, and timing—then predict threats.",pick: "purple" },
+        ],
+      },
+      {
+        id: 7,
+        text: "Question 7: You and a friend are hiding from a dangerous beast in the dense forest. Its footsteps are close. What’s your move?",
+        image: "image/q7.png",
+        caption: "",
+        answers: [
+          { text: "You work well together, it will be an easy fight if it comes to it.", pick: "red"    },
+          { text: "Hide for now, but if it comes to it you must be the sacrifice.",      pick: "orange" },
+          { text: "Feel its magic. When it goes away, be quick to slip away silently.",  pick: "green"  },
+          { text: "Freeze, and prepare to shield as needed in case of a fight.",         pick: "yellow" },
+          { text: "Move to an area where you have control over the imminent fight.",     pick: "blue"   },
+          { text: "Build a plan: escape route, backup route, and a timed distraction.",  pick: "purple" },
+        ],
+      },
+      {
+        id: 8,
+        text: "Question 8: You find a mirror that shows the life you almost lived. You can step through.",
+        image: "image/q8.png",
+        caption: "",
+        answers: [
+          { text: "Figure out what you truly want. Trust your gut—and your heart—before entering.", pick: "red"    },
+          { text: "Refuse the temptation and commit to the life you were given.",                   pick: "orange" },
+          { text: "Put your arm in first, enter slowly, and feel the magic to see if you belong.", pick: "green"  },
+          { text: "Break the mirror. It is likely a trap.",                                         pick: "yellow" },
+          { text: "Take notes. Maybe you can replicate this magic yourself.",                       pick: "blue"   },
+          { text: "Study consequences first—choose only if the outcome is worth it.",               pick: "purple" },
         ],
       },
     ];
@@ -111,12 +152,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // -----------------------------
     let index = 0;
     const picks = Array(QUESTIONS.length).fill(null);
-
-    let tiePick = null;          // user’s choice on the tie-break page
-    let finalWinnerKey = null;   // winner used on results page
+    let tiePick = null;
+    let finalWinnerKey = null;
 
     // -----------------------------
-    // SHUFFLE (Q2–Q5) stable per question
+    // SHUFFLE (stable per question)
     // -----------------------------
     function shuffleCopy(arr) {
       const a = arr.slice();
@@ -177,13 +217,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // loader
     const loadingScreen = document.getElementById("loadingScreen");
     const loadingText = document.getElementById("loadingText");
-    const loadingFill = document.getElementById("loadingFill"); // swordFillClip
+    const loadingFill = document.getElementById("loadingFill"); // .swordFillClip
     const btnEnter = document.getElementById("btnEnter");
+    const loadingLiquid = loadingFill ? loadingFill.querySelector(".swordFill") : null;
 
     const required = [
       pages.start, pages.question, pages.tie, pages.result,
-      btnBegin, btnNext,
-      loadingScreen, loadingFill, loadingText,
+      btnBegin, btnNext, btnBack,
+      loadingScreen, loadingFill, loadingText, btnEnter,
       tieShelf, btnTieConfirm, btnTieBack
     ];
     if (required.some(x => !x)) {
@@ -192,29 +233,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // -----------------------------
-    // SCROLL FIX (Stops Q2–Q5 from jumping to bottom / trapping scroll)
-    // Root cause is usually focus scrolling on radio inputs.
-    // Fix:
-    // 1) We never focus the input (prevent default on pointerdown/click).
-    // 2) On navigation we reset scroll to top AFTER layout.
+    // SCROLL FIX
     // -----------------------------
     function getScrollHost() {
-      // Most likely scroll container is <main id="app"> on mobile (if overflow:auto).
-      // If not, fallback to document.scrollingElement.
       const main = document.getElementById("app");
       const doc = document.scrollingElement || document.documentElement;
-      // pick whichever is actually scrollable right now
       if (main && main.scrollHeight > main.clientHeight + 2) return main;
       return doc;
     }
-
     function resetScrollTop() {
       const host = getScrollHost();
       if (host) host.scrollTop = 0;
-      // also reset window scroll if the page itself scrolls
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     }
-
     function resetScrollTopAfterPaint() {
       requestAnimationFrame(() => requestAnimationFrame(resetScrollTop));
     }
@@ -228,8 +259,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function setProgress() {
-      if (!barFill || !barText) return;
-
       const total = QUESTIONS.length;
 
       if (pages.tie.classList.contains("active")) {
@@ -245,7 +274,6 @@ document.addEventListener("DOMContentLoaded", () => {
           : 0;
 
       barFill.style.width = `${pct}%`;
-
       barText.textContent =
         pages.question.classList.contains("active") ? `Progress: ${index + 1}/${total}` :
         pages.result.classList.contains("active") ? "Complete" :
@@ -257,7 +285,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderMedia(q) {
-      if (!qMedia || !qImage || !qCaption) return;
       if (q.image) {
         qMedia.style.display = "block";
         qImage.src = q.image;
@@ -271,14 +298,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function markSelected(container, itemSelector, selectedEl) {
-      if (!container) return;
       container.querySelectorAll(itemSelector).forEach(el => el.classList.remove("selected"));
       if (selectedEl) selectedEl.classList.add("selected");
     }
 
-    // Prevent focus-scrolling on radios by handling selection ourselves
     function wireNoFocusSelect(label, input, onSelect) {
-      // Make label keyboard accessible
       label.tabIndex = 0;
 
       const select = () => {
@@ -286,39 +310,16 @@ document.addEventListener("DOMContentLoaded", () => {
         onSelect();
       };
 
-      // pointerdown is the big one that prevents the browser from focusing+scrolling
-      label.addEventListener("pointerdown", (e) => {
-        e.preventDefault();
-        select();
-      }, { passive: false });
-
-      // fallback for browsers without pointer events
-      label.addEventListener("mousedown", (e) => {
-        e.preventDefault();
-        select();
-      });
-
-      label.addEventListener("touchstart", (e) => {
-        e.preventDefault();
-        select();
-      }, { passive: false });
-
-      label.addEventListener("click", (e) => {
-        e.preventDefault();
-        select();
-      });
+      label.addEventListener("pointerdown", (e) => { e.preventDefault(); select(); }, { passive: false });
+      label.addEventListener("mousedown", (e) => { e.preventDefault(); select(); });
+      label.addEventListener("touchstart", (e) => { e.preventDefault(); select(); }, { passive: false });
+      label.addEventListener("click", (e) => { e.preventDefault(); select(); });
 
       label.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          select();
-        }
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(); }
       });
 
-      // never allow the input itself to take focus (another scroll trigger on mobile)
-      input.addEventListener("focus", () => {
-        try { input.blur(); } catch {}
-      });
+      input.addEventListener("focus", () => { try { input.blur(); } catch {} });
     }
 
     // -----------------------------
@@ -331,13 +332,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (bgm && audioVol) {
       bgm.volume = Number(audioVol.value || 0.6);
-      audioVol.addEventListener("input", () => {
-        bgm.volume = Number(audioVol.value);
-      });
+      audioVol.addEventListener("input", () => { bgm.volume = Number(audioVol.value); });
     }
 
     // -----------------------------
-    // PRELOADING HELPERS (and decode to speed Q1)
+    // PRELOADING
     // -----------------------------
     function preloadAndDecodeImage(src, timeoutMs = 15000) {
       return new Promise((resolve) => {
@@ -389,108 +388,109 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // -----------------------------
-    // LOADER (sword height fill + 3 messages by %)
+    // LOADER
     // -----------------------------
     function loaderMessageForPct(pct) {
-      if (pct < 34) return "Walking streets…";
-      if (pct < 67) return "Enjoying celebration…";
-      return "Waiting in line…";
+      if (pct < 34) return "Exploring City...";
+      if (pct < 67) return "Enjoying Festival...";
+      return "Entering Square...";
     }
 
     async function runLoaderAndPreload() {
-      loadingScreen.classList.add("active");
-      btnBegin.disabled = true;
-      btnEnter.disabled = true;
-
-      // bottom-up fill: animate HEIGHT
-      loadingFill.style.width = "100%";
-      loadingFill.style.height = "0%";
-      loadingFill.style.left = "0";
-      loadingFill.style.right = "0";
-      loadingFill.style.bottom = "0";
-      loadingFill.style.top = "auto";
-
-      // Build list of assets to preload + decode
-      const urls = [];
-
-      // question images + q1 item images
-      for (const q of QUESTIONS) {
-        if (q.image) urls.push(q.image);
-        for (const a of (q.answers || [])) if (a.img) urls.push(a.img);
-      }
-
-      // tie icons (optional)
-      for (const p of PERSONALITIES) if (p.icon) urls.push(p.icon);
-
-      // shelf background (from inline --shelf-img on #shelf / #tieShelf)
-      const shelfBg1 = shelfEl ? getComputedStyle(shelfEl).getPropertyValue("--shelf-img") : "";
-      const shelfBg2 = tieShelf ? getComputedStyle(tieShelf).getPropertyValue("--shelf-img") : "";
-      const extractCssUrl = (val) => {
-        const m = String(val || "").match(/url\((["']?)(.*?)\1\)/i);
-        return m ? m[2] : "";
-      };
-      const bg1 = extractCssUrl(shelfBg1);
-      const bg2 = extractCssUrl(shelfBg2);
-      if (bg1) urls.push(bg1);
-      if (bg2) urls.push(bg2);
-
-      const unique = Array.from(new Set(urls.filter(Boolean)));
-      const includeAudio = !!(bgm && bgm.src);
-
-      let preloadDone = false;
-      const start = performance.now();
-      let finishStart = null;
-
-      const setSword = (p01) => {
-        const pct = Math.round(clamp01(p01) * 100);
-        loadingFill.style.height = pct + "%";
-        loadingText.textContent = `${loaderMessageForPct(pct)} (${pct}%)`;
+      const fail = (msg, err) => {
+        console.error(msg, err);
+        if (loadingText) loadingText.textContent = `Loader error: ${msg}${err?.message ? " — " + err.message : ""}`;
+        if (btnEnter) btnEnter.disabled = false;
       };
 
-      function tick() {
-        const elapsed = performance.now() - start;
+      try {
+        loadingScreen.classList.add("active");
+        loadingScreen.classList.remove("ready"); // start white each time
+        btnBegin.disabled = true;
+        btnEnter.disabled = true;
 
-        // 0 -> 90% over MIN_LOADER_MS
-        const time01 = clamp01(elapsed / MIN_LOADER_MS);
-        let shown = time01 * 0.90;
+        if (loadingLiquid) loadingLiquid.style.transform = "scaleX(0)";
 
-        const timeGate = elapsed >= MIN_LOADER_MS;
-
-        // final 10% when both ready
-        if (timeGate && preloadDone) {
-          if (!finishStart) finishStart = performance.now();
-          const fElapsed = performance.now() - finishStart;
-          const f01 = clamp01(fElapsed / FINISH_MS);
-          shown = 0.90 + f01 * 0.10;
-        } else if (timeGate && !preloadDone) {
-          shown = 0.90;
+        // Build asset list
+        const urls = [];
+        for (const q of QUESTIONS) {
+          if (q.image) urls.push(q.image);
+          for (const a of (q.answers || [])) if (a.img) urls.push(a.img);
         }
+        for (const p of PERSONALITIES) if (p.icon) urls.push(p.icon);
 
-        setSword(shown);
+        const extractCssUrl = (val) => {
+          const m = String(val || "").match(/url\((["']?)(.*?)\1\)/i);
+          return m ? m[2] : "";
+        };
+        const shelfBg1 = shelfEl ? getComputedStyle(shelfEl).getPropertyValue("--shelf-img") : "";
+        const shelfBg2 = tieShelf ? getComputedStyle(tieShelf).getPropertyValue("--shelf-img") : "";
+        const bg1 = extractCssUrl(shelfBg1);
+        const bg2 = extractCssUrl(shelfBg2);
+        if (bg1) urls.push(bg1);
+        if (bg2) urls.push(bg2);
 
-        const ready = timeGate && preloadDone;
-        btnEnter.disabled = !ready;
+        const unique = Array.from(new Set(urls.filter(Boolean)));
+        const includeAudio = !!(bgm && bgm.src);
 
-        if (!(ready && shown >= 0.999)) {
+        let preloadDone = false;
+        const start = performance.now();
+        let finishStart = null;
+
+        const setSword = (p01) => {
+          const p = clamp01(p01);
+          const pct = Math.round(p * 100);
+          if (loadingLiquid) loadingLiquid.style.transform = `scaleX(${p})`;
+          if (loadingText) loadingText.textContent = `${loaderMessageForPct(pct)} (${pct}%)`;
+        };
+
+        const tick = () => {
+          const elapsed = performance.now() - start;
+
+          // 0 -> 90% over MIN_LOADER_MS
+          const time01 = clamp01(elapsed / MIN_LOADER_MS);
+          let shown = time01 * 0.90;
+
+          const timeGate = elapsed >= MIN_LOADER_MS;
+
+          // last 10% when both time + preload are done
+          if (timeGate && preloadDone) {
+            if (!finishStart) finishStart = performance.now();
+            const f01 = clamp01((performance.now() - finishStart) / FINISH_MS);
+            shown = 0.90 + f01 * 0.10;
+          } else if (timeGate && !preloadDone) {
+            shown = 0.90;
+          }
+
+          setSword(shown);
+
+          const ready = timeGate && preloadDone;
+          btnEnter.disabled = !ready;
+
+          if (ready && shown >= 0.999) {
+            setSword(1);
+            btnBegin.disabled = false;
+            loadingScreen.classList.add("ready"); // triggers your gradient overlay CSS
+            if (loadingText) loadingText.textContent = "Loaded! Press Enter to begin.";
+            return; // STOP the RAF loop
+          }
+
           requestAnimationFrame(tick);
-        } else {
-          setSword(1);
-          btnBegin.disabled = false;
-          loadingText.textContent = "Loaded! Press Enter to begin.";
+        };
+
+        requestAnimationFrame(tick);
+
+        await Promise.all(unique.map(src => preloadAndDecodeImage(src)));
+
+        if (includeAudio) {
+          const ar = await preloadAudio(bgm);
+          if (!ar.ok) console.warn("Audio preload failed:", ar.src);
         }
+
+        preloadDone = true;
+      } catch (err) {
+        fail("runLoaderAndPreload crashed", err);
       }
-
-      requestAnimationFrame(tick);
-
-      // Decode everything so Q1 is instant after Begin
-      await Promise.all(unique.map(src => preloadAndDecodeImage(src)));
-
-      if (includeAudio) {
-        const ar = await preloadAudio(bgm);
-        if (!ar.ok) console.warn("Audio preload failed:", ar.src);
-      }
-
-      preloadDone = true;
     }
 
     // -----------------------------
@@ -499,6 +499,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function enterFromLoad() {
       safePlay();
       loadingScreen.classList.remove("active");
+      loadingScreen.classList.remove("ready");
       show("start");
       setProgress();
       resetScrollTopAfterPaint();
@@ -511,7 +512,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    // start loader immediately
+    // Start loader immediately
     await runLoaderAndPreload();
 
     // -----------------------------
@@ -557,9 +558,8 @@ document.addEventListener("DOMContentLoaded", () => {
       answersEl.style.display = "grid";
       answersEl.innerHTML = "";
 
-      let answersToRender = q.answers;
       if (!shuffledAnswersById[q.id]) shuffledAnswersById[q.id] = shuffleCopy(q.answers);
-      answersToRender = shuffledAnswersById[q.id];
+      const answersToRender = shuffledAnswersById[q.id];
 
       answersToRender.forEach((a, ai) => {
         const id = `q${q.id}_a${ai}`;
@@ -604,25 +604,23 @@ document.addEventListener("DOMContentLoaded", () => {
       btnBack.disabled = (index === 0);
 
       setProgress();
-      resetScrollTopAfterPaint(); // important: reset after layout so it doesn’t jump down
+      resetScrollTopAfterPaint();
     }
 
     // -----------------------------
-    // TIE-BREAK (Option C shelf page)
+    // TIE-BREAK
     // -----------------------------
     function renderTieShelf(leaders) {
       tiePick = null;
       btnTieConfirm.disabled = true;
       tieShelf.innerHTML = "";
 
-      if (tieText) {
-        tieText.textContent =
-          leaders.length === 2
-            ? "Two magics reach for you… choose the one that feels louder."
-            : "Several magics pull at you… choose the one that feels true.";
-      }
+      tieText.textContent =
+        leaders.length === 2
+          ? "Two magics reach for you… choose the one that feels louder."
+          : "Several magics pull at you… choose the one that feels true.";
 
-      leaders.forEach((key, i) => {
+      leaders.forEach((key) => {
         const p = PERSONALITIES.find(x => x.key === key);
         const img = (p && p.icon) ? p.icon : `image/${key}.png`;
 
@@ -636,7 +634,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
 
         const input = label.querySelector("input");
-
         wireNoFocusSelect(label, input, () => {
           tiePick = key;
           btnTieConfirm.disabled = false;
@@ -651,11 +648,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // -----------------------------
-    // SCORING
+    // SCORING (Q2–Q8)
     // -----------------------------
     function computeResult() {
       const counts = Object.fromEntries(PERSONALITIES.map(p => [p.key, 0]));
-      // Q2–Q5 only (index 1..4)
       for (let i = 1; i < QUESTIONS.length; i++) if (picks[i]) counts[picks[i]]++;
 
       const max = Math.max(...Object.values(counts));
@@ -665,7 +661,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let winnerKey = leaders[0] || PERSONALITIES[0].key;
 
-      // If tie and Q1 is one of the leaders, Q1 breaks the tie (otherwise still tied)
       if (leaders.length > 1) {
         const tieBreakPick = picks[0];
         if (tieBreakPick && leaders.includes(tieBreakPick)) winnerKey = tieBreakPick;
@@ -694,11 +689,9 @@ document.addEventListener("DOMContentLoaded", () => {
         resultTags.appendChild(span);
       });
 
-      if (scoreBreakdown) {
-        const lines = PERSONALITIES.map(pp => `${pp.key.padEnd(7)} : ${counts[pp.key]}`).join("\n");
-        scoreBreakdown.textContent =
-          `Counts (Q2–Q5 only):\n${lines}\n\nLeaders: ${leaders.join(", ")}\nQ1 pick: ${picks[0] ?? "—"}\nWinner: ${finalWinnerKey}`;
-      }
+      const lines = PERSONALITIES.map(pp => `${pp.key.padEnd(7)} : ${counts[pp.key]}`).join("\n");
+      scoreBreakdown.textContent =
+        `Counts (Q2–Q8):\n${lines}\n\nLeaders: ${leaders.join(", ")}\nQ1 pick: ${picks[0] ?? "—"}\nWinner: ${finalWinnerKey}`;
 
       barFill.style.width = "100%";
       barText.textContent = "Complete";
@@ -711,7 +704,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // -----------------------------
     btnBegin.addEventListener("click", () => {
       safePlay();
-      // reset round
       for (const k in shuffledAnswersById) delete shuffledAnswersById[k];
       tiePick = null;
       finalWinnerKey = null;
@@ -739,7 +731,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Finished Q5 -> decide tie or results
       const r = computeResult();
       if (r.leaders.length > 1) {
         show("tie");
@@ -752,9 +743,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setProgress();
     });
 
-    // Tie page buttons
     btnTieBack.addEventListener("click", () => {
-      // go back to last question (Q5)
       show("question");
       index = QUESTIONS.length - 1;
       renderQuestion();
@@ -767,39 +756,33 @@ document.addEventListener("DOMContentLoaded", () => {
       setProgress();
     });
 
-    if (btnRestart) {
-      btnRestart.addEventListener("click", () => {
-        for (let i = 0; i < QUESTIONS.length; i++) picks[i] = null;
-        for (const k in shuffledAnswersById) delete shuffledAnswersById[k];
-        tiePick = null;
-        finalWinnerKey = null;
+    btnRestart.addEventListener("click", () => {
+      for (let i = 0; i < QUESTIONS.length; i++) picks[i] = null;
+      for (const k in shuffledAnswersById) delete shuffledAnswersById[k];
+      tiePick = null;
+      finalWinnerKey = null;
 
-        index = 0;
-        show("start");
-        barFill.style.width = "0%";
-        barText.textContent = "Start";
-        resetScrollTopAfterPaint();
-      });
-    }
+      index = 0;
+      show("start");
+      barFill.style.width = "0%";
+      barText.textContent = "Start";
+      resetScrollTopAfterPaint();
+    });
 
-    if (btnShare) {
-      btnShare.addEventListener("click", async () => {
-        // share the actual winner shown
-        const winner = finalWinnerKey || computeResult().winnerKey;
-        const p = PERSONALITIES.find(x => x.key === winner) || PERSONALITIES[0];
-        const text = `I got ${p.name} on the quiz!`;
+    btnShare.addEventListener("click", async () => {
+      const winner = finalWinnerKey || computeResult().winnerKey;
+      const p = PERSONALITIES.find(x => x.key === winner) || PERSONALITIES[0];
+      const text = `I got ${p.name} on the quiz!`;
 
-        try {
-          await navigator.clipboard.writeText(text);
-          btnShare.textContent = "Copied!";
-          setTimeout(() => (btnShare.textContent = "Copy result"), 900);
-        } catch {
-          alert(text);
-        }
-      });
-    }
+      try {
+        await navigator.clipboard.writeText(text);
+        btnShare.textContent = "Copied!";
+        setTimeout(() => (btnShare.textContent = "Copy result"), 900);
+      } catch {
+        alert(text);
+      }
+    });
 
-    // start at start page (loader sends you here after Enter)
     setProgress();
   })().catch((err) => {
     console.error("script.js crashed:", err);

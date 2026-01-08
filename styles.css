@@ -414,6 +414,23 @@ main{ padding: 18px 20px 20px; }
   outline-offset: 0;
   box-shadow: 0 0 0 1px rgba(167,139,250,.12);
 }
+
+/* Make tie-break shelf items darker than Q1 shelf items */
+#tieShelf .shelfItem{
+  background: rgba(0,0,0,.28);
+  border-color: rgba(255,255,255,.10);
+}
+
+#tieShelf .shelfItem:hover{
+  background: rgba(0,0,0,.36);
+  border-color: rgba(255,255,255,.16);
+}
+
+#tieShelf .shelfItem.selected{
+  background: rgba(0,0,0,.42);
+  outline-color: rgba(167,139,250,.55);
+}
+
 .shelfItem.selected img{ transform: translateY(-3px) scale(1.03); }
 
 .resultGrid{
@@ -428,6 +445,25 @@ main{ padding: 18px 20px 20px; }
   border-radius: 18px;
   padding: 14px;
 }
+.resultImageBox{
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: var(--shadow2);
+  margin: 0 0 12px;
+  display: none; /* JS will show it only if an icon exists */
+}
+
+.resultImageBox img{
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+
+
 .pillRow{ display:flex; flex-wrap:wrap; gap:10px; margin: 10px 0 0; }
 .pill{
   padding: 6px 10px;
@@ -590,21 +626,18 @@ main{ padding: 18px 20px 20px; }
   overflow: hidden;            /* keeps overlay clean */
 }
 
-/* Gradient overlay that fades + moves in */
 .swordFill::before{
   content:"";
   position:absolute;
   inset:0;
-
   background: linear-gradient(
     90deg,
     rgba(36, 158, 199, 1) 34%,
     rgba(232, 167, 53, 1) 35%, 
     rgba(212, 145, 30, 1) 65%,
-    rgba(35, 148, 86, 1) 66%);
+    rgba(35, 148, 86, 1) 66%
   );
-
-  opacity: 0; /* hidden while loading */
+  opacity: 0;
   transition: opacity 2s ease, background-position 2s ease;
 }
 
@@ -667,3 +700,4 @@ background: linear-gradient(90deg, rgba(36, 169, 199, 1) 0%, rgba(232, 167, 53, 
   .resultGrid{ grid-template-columns: 1.2fr .8fr; }
   .shelf{ grid-template-columns: repeat(6, minmax(0, 1fr)); }
 }
+

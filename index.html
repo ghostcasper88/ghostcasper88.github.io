@@ -15,7 +15,7 @@
       <div class="audioTitle" id="audioTitle">Welcome To Prismia</div>
       <div class="audioSub" id="audioSub">Do You Feel Immersed Yet?</div>
     </div>
-    <input class="audioVol" id="audioVol" type="range" min="0" max="1" step="0.01" value="0.6" aria-label="Volume">
+    <input class="audioVol" id="audioVol" type="range" min="0" max="1" step="0.01" value="0.4" aria-label="Volume">
   </div>
 
   <!-- ===== Loading Screen ===== -->
@@ -134,8 +134,16 @@
             </div>
 
             <div>
-              <h3 style="margin:0 0 8px; font-size:16px;">Breakdown</h3>
-              <div id="scoreBreakdown" style="color:var(--muted); font-size:13px; white-space:pre-wrap;"></div>
+     <div>
+            <h3 style="margin:0 0 8px; font-size:16px;">Breakdown</h3>
+
+            <!-- NEW: result image box -->
+                <div class="resultImageBox" id="resultImageBox" aria-hidden="false">
+                <img id="resultImage" src="" alt="">
+                </div>
+
+            <div id="scoreBreakdown" style="color:var(--muted); font-size:13px; white-space:pre-wrap;"></div>
+    </div>
             </div>
           </div>
 

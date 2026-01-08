@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
         desc: "A red soul: passionate, untamed, and built for the journey.",
         tags: ["Free Soul", "Nomadic", "Passionate"],
         icon: "image/red.png",
+        resultImage: "image/wind.png",
         bodyHtml: `
           <p><strong>Winds</strong> don’t ask permission—they move.</p>
           <p>Your magic rises from a <strong>free soul</strong>, fueled by emotion, momentum, and the pull of open horizons. Outsiders often mistake your intensity for aggression, but the truth is simpler: you feel deeply, and you live honestly.</p>
@@ -42,6 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
         desc: "A focused soul: disciplined heat, tradition, and watchful devotion.",
         tags: ["Focused Soul", "Disciplined", "Traditional"],
         icon: "image/orange.png",
+        resultImage: "image/flame.png",
         bodyHtml: `
           <p><strong>Flame</strong> is not chaos—it’s control.</p>
           <p>Your power comes from a <strong>focused soul</strong>: emotions contained, understood, and directed like a steady torch in a storm. Those chosen by the Flame often carry deep respect for history, ritual, and the spirits that shaped their region.</p>
@@ -56,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
         desc: "A controlled body: strength, service, and the pride of being useful.",
         tags: ["Focused Body", "Provider", "Enduring"],
         icon: "image/yellow.png",
+        resultImage: "image/harvest.png",
         bodyHtml: `
           <p><strong>Harvest</strong> is the magic of strength and sheer will.</p>
           <p>Your gift is drawn through a <strong>controlled body</strong>—muscle, bone, and blood made into a channel. That control becomes strength: the kind needed to protect, to build, and to feed entire regions.</p>
@@ -70,6 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
         desc: "A free body: flowing instincts, artistry, and magic that dances.",
         tags: ["Free Body", "Artistic", "Spiritual"],
         icon: "image/green.png",
+        resultImage: "image/forest.png",
         bodyHtml: `
           <p><strong>Forest</strong> does not force—it guides.</p>
           <p>Your magic is born from a <strong>free body</strong>: you sense energy and move with it, like dancing. Forest folk tend to be musical, expressive, and alive to subtle shifts—wind through leaves, current through roots.</p>
@@ -84,6 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
         desc: "A free, creative mind: curiosity, craft, and endless horizons.",
         tags: ["Free Mind", "Curious", "Creative"],
         icon: "image/blue.png",
+        resultImage: "image/sea.png",
         bodyHtml: `
           <p><strong>Sea</strong> is learning and adaptation turned into power.</p>
           <p>Your gift is shaped by a <strong>free mind</strong>—the kind that explores, questions, combines, and invents. Sea mages treat education and art like essentials, not luxuries.</p>
@@ -98,6 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
         desc: "A focused mind: strategy, precision, and unshakable defense.",
         tags: ["Focused Mind", "Strategic", "Resilient"],
         icon: "image/purple.png",
+        resultImage: "image/stone.png",
         bodyHtml: `
           <p><strong>Stone</strong> is patience with an edge.</p>
           <p>Your power comes from a <strong>focused mind</strong>—meticulous, planning-oriented, and sometimes so precise it becomes tunnel vision. Stone folk are famously defensive, but not passive: when needed, they strike with deliberate force.</p>
@@ -281,6 +287,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const resultBody = document.getElementById("resultBody");
     const resultTags = document.getElementById("resultTags");
     const scoreBreakdown = document.getElementById("scoreBreakdown");
+    const resultImageBox = document.getElementById("resultImageBox");
+    const resultImage = document.getElementById("resultImage");
 
     // tie page
     const tieText = document.getElementById("tieText");
@@ -752,6 +760,21 @@ document.addEventListener("DOMContentLoaded", () => {
       finalWinnerKey = forcedWinnerKey || winnerKey;
 
       const p = PERSONALITIES.find(x => x.key === finalWinnerKey) || PERSONALITIES[0];
+       
+// NEW: result image (keeps breakdown column intact)
+if (resultImageBox && resultImage) {
+  const src = p.resultImage || "";   // use resultImage, NOT icon
+  if (src) {
+    resultImage.src = src;
+    resultImage.alt = p.title || p.name || "Result image";
+    resultImageBox.style.display = "block";
+  } else {
+    resultImage.src = "";
+    resultImage.alt = "";
+    resultImageBox.style.display = "none";
+  }
+}
+
 
       // Title + short description
       resultTitle.textContent = p.title || `Chosen by the ${p.name}`;
@@ -771,8 +794,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Debug breakdown
       const lines = PERSONALITIES.map(pp => `${pp.key.padEnd(7)} : ${counts[pp.key]}`).join("\n");
-      scoreBreakdown.textContent =
-        `Counts (Q2–Q8):\n${lines}\n\nLeaders: ${leaders.join(", ")}\nQ1 pick: ${picks[0] ?? "—"}\nWinner: ${finalWinnerKey}`;
+     
 
       barFill.style.width = "100%";
       barText.textContent = "Complete";
